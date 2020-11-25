@@ -174,6 +174,7 @@ class Patient(object):
 #
 # PROBLEM 2
 #
+import numpy as np
 def simulationWithoutDrug(numViruses, maxPop, maxBirthProb, clearProb,
                           numTrials):
     """
@@ -189,11 +190,40 @@ def simulationWithoutDrug(numViruses, maxPop, maxBirthProb, clearProb,
     clearProb: Maximum clearance probability (a float between 0-1)
     numTrials: number of simulation runs to execute (an integer)
     """
-
     # TODO
-
-
-
+    # initial all_pops: list of lists which contain each trail's virus population for 300 steps
+    all_pops = []
+    
+    # start trails
+    for _ in range(numTrials):
+        
+        #initiate numViruses identical viruses
+        viruses = np.full(numViruses, SimpleVirus(maxBirthProb, clearProb))
+        
+        #initiate patient
+        patient1 = Patient(viruses.tolist(), maxPop)
+        
+        pops = []
+        #300 steps
+        for step in range(300):
+            pop = patient1.update()
+            pops.append(pop)
+        
+        all_pops.append(pops)
+    
+    # convert all_pops from list to np object
+    all_pops = np.array(all_pops)
+    
+    # calculate average pop at X step
+    avg_pops = np.average(all_pops, axis = 0)
+    
+    pylab.plot(np.arange(1, 301), avg_pops, label = "SimpleVirus")
+    pylab.title("SimpleVirus simulation")
+    pylab.xlabel("Time Steps")
+    pylab.ylabel("Average Virus Population")
+    pylab.legend(loc = "best")
+    pylab.show()
+    
 #
 # PROBLEM 3
 #
