@@ -249,21 +249,24 @@ class ResistantVirus(SimpleVirus):
         mutProb: Mutation probability for this virus particle (a float). This is
         the probability of the offspring acquiring or losing resistance to a drug.
         """
-
         # TODO
-
+        super().__init__(maxBirthProb, clearProb)
+        self.resistances = resistances
+        self.mutProb = mutProb
 
     def getResistances(self):
         """
         Returns the resistances for this virus.
         """
         # TODO
+        return self.resistances
 
     def getMutProb(self):
         """
         Returns the mutation probability for this virus.
         """
         # TODO
+        return self.mutProb
 
     def isResistantTo(self, drug):
         """
@@ -276,8 +279,11 @@ class ResistantVirus(SimpleVirus):
         returns: True if this virus instance is resistant to the drug, False
         otherwise.
         """
-        
         # TODO
+        try:
+            return self.resistances[drug]
+        except KeyError:
+            return False
 
 
     def reproduce(self, popDensity, activeDrugs):
@@ -324,11 +330,23 @@ class ResistantVirus(SimpleVirus):
         maxBirthProb and clearProb values as this virus. Raises a
         NoChildException if this virus particle does not reproduce.
         """
-
         # TODO
-
-            
-
+        # check if this virus resists to ALL the drugs in the activeDrug list
+        if len(activeDrugs) == sum([self.isResistantTo(drug) for drug in activeDrugs]):
+            # check prob of reproduction of itself   
+            if random.random() <= self.maxBirthProb * (1 - popDensity):
+                #update resistance before reproduce
+                resistances = {}
+                for drug, resis in self.resistances.items():
+                    if random.random() <= 1 - self.mutProb:
+                        resistances[drug] = resis
+                    else:
+                        resistances[drug] = not resis
+                        
+                return ResistantVirus(self.maxBirthProb, self.clearProb, resistances, self.mutProb)
+        else: # no reproduction
+            raise NoChildException
+        
 class TreatedPatient(Patient):
     """
     Representation of a patient. The patient is able to take drugs and his/her
@@ -346,8 +364,8 @@ class TreatedPatient(Patient):
 
         maxPop: The  maximum virus population for this patient (an integer)
         """
-
         # TODO
+        Patient.__init__(viruses, maxPop)
 
 
     def addPrescription(self, newDrug):
@@ -360,9 +378,8 @@ class TreatedPatient(Patient):
 
         postcondition: The list of drugs being administered to a patient is updated
         """
-
         # TODO
-
+        
 
     def getPrescriptions(self):
         """
