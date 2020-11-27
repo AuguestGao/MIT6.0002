@@ -496,7 +496,8 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
     # TODO
     # initial all_pops: list of lists which contain each trail's virus population for timestep steps
     timestep = 150
-    all_pops = []
+    allTrial_totalPops = []
+    allTrial_guttagonolResistPops = []
     
     # start trails
     for _ in range(numTrials):
@@ -506,25 +507,35 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
 
         #initiate patient
         patient2 = TreatedPatient(viruses.tolist(), maxPop)
-        pops = []
+        totalPops = []
+        guttagonolResistPops = []
         for step1 in range(timestep):
-            pop = patient2.update()
-            pops.append(pop)
-        
+            totalPop = patient2.update()
+            totalPops.append(totalPop)
+            guttagonolResistPop = patient2.getResistPop(['guttagonol'])
+            guttagonolResistPops.append(guttagonolResistPop)
+            
         patient2.addPrescription('guttagonol')
-        for step2 in range(timestep):
-            pop = patient2.update()
-            pops.append(pop)           
         
-        all_pops.append(pops)
+        for step2 in range(timestep):
+            totalPop = patient2.update()
+            totalPops.append(totalPop)
+            guttagonolResistPop = patient2.getResistPop(['guttagonol'])
+            guttagonolResistPops.append(guttagonolResistPop)          
+        
+        allTrial_totalPops.append(totalPops)
+        allTrial_guttagonolResistPops.append(guttagonolResistPops)
     
     # convert all_pops from list to np object
-    all_pops = np.array(all_pops)
+    allTrial_totalPops = np.array(allTrial_totalPops)
+    allTrial_guttagonolResistPops = np.array(allTrial_guttagonolResistPops)
     
     # calculate average pop at X step
-    avg_pops = np.average(all_pops, axis = 0)
+    avg_totalPops = np.average(allTrial_totalPops, axis = 0)
+    avg_guttagonolResistPops = np.average(allTrial_guttagonolResistPops, axis = 0)
     
-    pylab.plot(np.arange(1, 301), avg_pops, label = "ResistantVirus")
+    pylab.plot(avg_totalPops, label = "Virus (total)")
+    pylab.plot(avg_guttagonolResistPops, label = "Virus (guttagonol resistant)")
     pylab.title("ResistantVirus simulation")
     pylab.xlabel("Time Steps")
     pylab.ylabel("Average Virus Population")
